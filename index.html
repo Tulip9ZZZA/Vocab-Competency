@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Competency</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #FF00FF, #8A2BE2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            padding: 30px;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            color: white;
+            position: relative;
+            animation: fadeInScale 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-section { display: none; }
+        .game-section.active { display: block; }
+
+        .btn {
+            @apply px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ease-in-out transform;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-btn {
+            background: linear-gradient(45deg, #E000E0, #FF00FF);
+            border: none;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .cta-btn:hover {
+            background: linear-gradient(45deg, #FF00FF, #E000E0);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 255, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 0, 255, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 255, 0); }
+        }
+
+        .choice-btn {
+            width: 100%;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .choice-btn.correct { background: rgba(0, 255, 0, 0.3); animation: flashGreen 0.5s ease-out; }
+        .choice-btn.incorrect { background: rgba(255, 0, 0, 0.3); animation: flashRed 0.5s ease-out; }
+        .choice-btn.selected {
+            background: rgba(255, 255, 255, 0.35);
+            animation: innerGlowPulse 0.8s forwards;
+            box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.8), 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes flashGreen {
+            0% { background-color: rgba(0, 255, 0, 0.3); }
+            100% { background-color: rgba(255, 255, 255, 0.2); }
+        }
+
+        @keyframes flashRed {
+            0% { background-color: rgba(255, 0, 0, 0.3); }
+            100% { background-color: rgba(255, 255, 255, 0.2); }
+        }
+
+        @keyframes innerGlowPulse {
+            0% { box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.5), 0 4px 15px rgba(0, 0, 0, 0.2); }
+            50% { box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.9), 0 4px 15px rgba(0, 0, 0, 0.2); }
+            100% { box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.8), 0 4px 15px rgba(0, 0, 0, 0.2); }
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #FF00FF, #E000E0);
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message-box {
+            background: rgba(0, 0, 0, 0.7);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        .message-box.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .message-content {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .message-box.active .message-content {
+            transform: translateY(0);
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-bar {
+            height: 20px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: width 1s ease-out;
+        }
+
+        .chart-bar.known { background-color: #4CAF50; }
+        .chart-bar.unknown { background-color: #F44336; }
+        .chart-label { font-size: 0.9em; margin-bottom: 5px; text-align: left; }
+        .user-id-display { font-size: 0.8em; opacity: 0.7; margin-top: 15px; word-break: break-all; }
+
+        #listen-btn {
+            border-radius: 9999px;
+            padding-left: 2rem;
+            padding-right: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        #listen-btn svg { transition: transform 0.3s ease-in-out; }
+        #listen-btn:hover svg { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <h1 id="game-title">Vocabulary Competency</h1>
+        <p class="user-id-display">User ID: <span id="user-id">Loading...</span></p>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="game-section active">
+            <p class="text-lg mb-8">Test your vocabulary and listening skills!</p>
+            <button id="start-game-btn" class="btn cta-btn">Start Game</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="game-section">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-lg">Level: <span id="level-display">1</span></p>
+                <p class="text-lg">Time: <span id="timer-display">60</span>s</p>
+            </div>
+            <div class="progress-bar-container mb-6">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <p class="text-xl mb-6">Listen to the word and choose the correct option:</p>
+            <button id="listen-btn" class="btn cta-btn w-full mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7">
+                    <path fill-rule="evenodd" d="M9.387 2.629c.573-.114 1.21-.033 1.637.321l4.337 3.609a2.25 2.25 0 0 1 .81 1.624v6.252a2.25 2.25 0 0 1-.81 1.625l-4.337 3.608c-.427.354-1.064.435-1.637.322A4.502 4.502 0 0 1 4.5 18.75V5.25a4.502 4.502 0 0 1 4.887-2.621ZM19.5 12a.75.75 0 0 0-1.5 0v.025a.75.75 0 0 0 1.5 0V12ZM16.5 12a.75.75 0 0 0-1.5 0v.025a.75.75 0 0 0 1.5 0V12ZM22.5 12a.75.75 0 0 0-1.5 0v.025a.75.75 0 0 0 1.5 0V12Z" clip-rule="evenodd" />
+                </svg>
+                Listen
+            </button>
+            <div id="loading-spinner" class="loading-spinner"></div>
+            <div id="choices-container" class="grid grid-cols-1 gap-4">
+                <button class="choice-btn btn" data-choice="0"></button>
+                <button class="choice-btn btn" data-choice="1"></button>
+                <button class="choice-btn btn" data-choice="2"></button>
+            </div>
+            <button id="submit-btn" class="btn cta-btn w-full mt-6" disabled>Submit Answer</button>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="game-section">
+            <h2 class="text-2xl font-bold mb-4" id="result-message"></h2>
+            <p class="text-lg mb-2">Total Words: <span id="total-words-display"></span></p>
+            <p class="text-lg mb-6">Words Known: <span id="words-known-display"></span></p>
+            <div class="chart-container">
+                <h3 class="text-xl font-semibold mb-4">Your Performance</h3>
+                <div class="chart-label">Known: <span id="chart-known-percentage"></span></div>
+                <div class="chart-bar known" id="chart-known-bar"></div>
+                <div class="chart-label">Unknown: <span id="chart-unknown-percentage"></span></div>
+                <div class="chart-bar unknown" id="chart-unknown-bar"></div>
+            </div>
+            <button id="play-again-btn" class="btn cta-btn mt-8">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Message Box for Alerts -->
+    <div id="message-box" class="message-box">
+        <div class="message-content">
+            <p id="message-text" class="text-xl mb-6"></p>
+            <button id="message-ok-btn" class="btn cta-btn">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Generate a simple user ID for local storage
+        function generateUserId() {
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user-' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            return userId;
+        }
+
+        // Message Box functionality
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const messageOkBtn = document.getElementById('message-ok-btn');
+
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('active');
+        }
+
+        messageOkBtn.addEventListener('click', () => {
+            messageBox.classList.remove('active');
+        });
+
+        // Initialize user ID
+        window.onload = () => {
+            const userId = generateUserId();
+            document.getElementById('user-id').textContent = userId;
+        };
+
+        // Game Elements
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const listenBtn = document.getElementById('listen-btn');
+        const choicesContainer = document.getElementById('choices-container');
+        const choiceButtons = document.querySelectorAll('.choice-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const levelDisplay = document.getElementById('level-display');
+        const timerDisplay = document.getElementById('timer-display');
+        const progressBar = document.getElementById('progress-bar');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const resultMessage = document.getElementById('result-message');
+        const totalWordsDisplay = document.getElementById('total-words-display');
+        const wordsKnownDisplay = document.getElementById('words-known-display');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const chartKnownBar = document.getElementById('chart-known-bar');
+        const chartUnknownBar = document.getElementById('chart-unknown-bar');
+        const chartKnownPercentage = document.getElementById('chart-known-percentage');
+        const chartUnknownPercentage = document.getElementById('chart-unknown-percentage');
+
+        // Game State
+        let vocabulary = [
+            { word: "interview", definition: "A formal meeting at which someone is asked questions to see if they are suitable for a job or a course", choices: ["interview", "curriculum", "attendance"], sentence: "I have a job interview tomorrow, so I need to prepare." },
+            { word: "curriculum", definition: "The subjects studied in a school, college, etc., and what is contained in each subject", choices: ["curriculum", "individual", "experiment"], sentence: "The school's curriculum includes science, math, and arts." },
+            { word: "attendance", definition: "The act of being present at a place or event", choices: ["attendance", "encourage", "salary"], sentence: "Good attendance is crucial for academic success." },
+            { word: "individual", definition: "A single person or thing, especially when compared to the group or society to which they belong", choices: ["individual", "private", "stressful"], sentence: "Each individual has unique talents and abilities." },
+            { word: "encourage", definition: "To make someone more likely to do something, or to make something more likely to happen", choices: ["encourage", "marry", "experiment"], sentence: "Teachers should encourage students to ask questions." },
+            { word: "experiment", definition: "A scientific test in which you perform a series of actions and carefully observe their effects in order to learn about something", choices: ["experiment", "program", "charity"], sentence: "The scientists conducted an experiment to test their hypothesis." },
+            { word: "salary", definition: "A fixed amount of money agreed every year as pay for an employee, usually paid every month", choices: ["salary", "willpower", "local"], sentence: "His new job offers a competitive salary and benefits." },
+            { word: "marry", definition: "To take someone as your husband or wife", choices: ["marry", "lose track", "attend"], sentence: "They decided to marry after dating for five years." },
+            { word: "private", definition: "For the use of one person or group, not for everyone", choices: ["private", "incredible", "make a difference"], sentence: "This is a private conversation, please don't listen in." },
+            { word: "stressful", definition: "Making you feel worried and nervous", choices: ["stressful", "satisfied", "disappointed"], sentence: "Exams can be very stressful for students." },
+            { word: "program", definition: "A set of instructions that a computer uses to perform a particular task", choices: ["program", "frightened", "tired"], sentence: "This stage of the work is so hard I didn't know how to program it to work efficiently." },
+            { word: "attend", definition: "To go to an event, place, etc.", choices: ["attend", "convinced", "disgusted"], sentence: "I plan to attend the conference next month." },
+            { word: "charity", definition: "An organization that gives money, food, or help to those who are in need", choices: ["charity", "fascinated", "touched"], sentence: "She volunteers her time at a local charity." },
+            { word: "incredible", definition: "Impossible, or very difficult, to believe", choices: ["incredible", "apply", "consider"], sentence: "The view from the mountain top was absolutely incredible." },
+            { word: "willpower", definition: "The ability to control your own thoughts and behavior", choices: ["willpower", "hear", "manage"], sentence: "It takes a lot of willpower to stick to a diet." },
+            { word: "make a difference", definition: "To have an effect on something or someone", choices: ["make a difference", "organize", "concentrate"], sentence: "Even small actions can make a difference in the world." },
+            { word: "lose track", definition: "To no longer know what is happening, or where something or someone is", choices: ["lose track", "abroad", "complain"], sentence: "I often lose track of time when I'm reading a good book." },
+            { word: "local", definition: "Relating to or occurring in a particular area, city, or town; located or living nearby", choices: ["local", "interview", "curriculum"], sentence: "We bought fresh produce from the local market." },
+            { word: "satisfied", definition: "Pleased because you have got what you wanted, or because something has happened in the way that you wanted", choices: ["satisfied", "attendance", "individual"], sentence: "She felt satisfied with her performance on the exam." },
+            { word: "disappointed", definition: "Unhappy because someone or something was not as good as you had hoped or expected", choices: ["disappointed", "encourage", "experiment"], sentence: "He was disappointed with the movie's ending." },
+            { word: "frightened", definition: "Feeling fear or worried", choices: ["frightened", "salary", "marry"], sentence: "The loud noise made the child feel frightened." },
+            { word: "tired", definition: "In need of sleep or rest", choices: ["tired", "private", "stressful"], sentence: "After a long day, I feel very tired." },
+            { word: "convinced", definition: "Completely certain about something", choices: ["convinced", "program", "attend"], sentence: "I'm convinced that she is telling the truth." },
+            { word: "disgusted", definition: "Feeling extreme dislike or disapproval of something or someone", choices: ["disgusted", "charity", "incredible"], sentence: "He was disgusted by the amount of litter on the street." },
+            { word: "fascinated", definition: "Extremely interested", choices: ["fascinated", "willpower", "make a difference"], sentence: "I'm fascinated by ancient history." },
+            { word: "touched", definition: "Feeling emotional, especially because of something kind that someone has done", choices: ["touched", "lose track", "local"], sentence: "I was deeply touched by their generosity." },
+            { word: "apply", definition: "To make a formal request, usually in writing, for something such as a job, a place at a university, or a loan", choices: ["apply", "satisfied", "disappointed"], sentence: "You need to apply for the scholarship by Friday." },
+            { word: "consider", definition: "To think carefully about something, especially before making a decision", choices: ["consider", "frightened", "tired"], sentence: "Please consider all your options before making a decision." },
+            { word: "hear", definition: "To perceive sound with your ear", choices: ["hear", "convinced", "disgusted"], sentence: "Did you hear that strange noise?" },
+            { word: "manage", definition: "To succeed in doing or dealing with something, especially something difficult", choices: ["manage", "fascinated", "touched"], sentence: "It's hard to manage a large team effectively." },
+            { word: "organize", definition: "To arrange or prepare something for an event or activity", choices: ["organize", "apply", "consider"], sentence: "She helped me organize the party." },
+            { word: "concentrate", definition: "To direct your attention or your efforts towards a particular activity, subject, or problem", choices: ["concentrate", "hear", "manage"], sentence: "It's difficult to concentrate with all this noise." },
+            { word: "abroad", definition: "In or to a foreign country or countries", choices: ["abroad", "organize", "concentrate"], sentence: "Many students choose to study abroad for a year." },
+            { word: "complain", definition: "To say that you are annoyed, not satisfied, or unhappy about something or someone", choices: ["complain", "abroad", "complain"], sentence: "He always complains about the weather." }
+        ];
+
+        let currentLevel = 1;
+        let score = 0;
+        let timer;
+        let timeLeft;
+        let currentWordIndex;
+        let wordsPlayed = [];
+        let wordsKnown = [];
+        let wordsUnknown = [];
+        let selectedChoice = null;
+        let gameActive = false;
+
+        const synth = window.speechSynthesis;
+
+        // Function to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Function to get a random word and its choices
+        function getQuestion() {
+            let availableWords = vocabulary.filter(word => !wordsPlayed.includes(word));
+            if (availableWords.length === 0) {
+                endGame(true);
+                return null;
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableWords.length);
+            currentWordIndex = vocabulary.indexOf(availableWords[randomIndex]);
+            const wordData = vocabulary[currentWordIndex];
+
+            let choices = [wordData.word];
+            let incorrectChoices = vocabulary.filter(w => w.word !== wordData.word && !choices.includes(w.word));
+            shuffleArray(incorrectChoices);
+
+            while (choices.length < 3 && incorrectChoices.length > 0) {
+                choices.push(incorrectChoices.pop().word);
+            }
+
+            while (choices.length < 3) {
+                const existingChoice = choices[Math.floor(Math.random() * choices.length)];
+                if (!choices.includes(existingChoice)) {
+                    choices.push(existingChoice);
+                } else {
+                    choices.push(`Option ${choices.length + 1}`);
+                }
+            }
+
+            shuffleArray(choices);
+            return { word: wordData.word, choices: choices, definition: wordData.definition };
+        }
+
+        // Function to speak the word
+        function speakWord(wordData) {
+            return new Promise((resolve) => {
+                let textToSpeak = currentLevel >= 17 ? wordData.sentence || `The word is ${wordData.word}.` : wordData.word;
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'en-US';
+
+                if (currentLevel <= 10) {
+                    utterance.pitch = 1;
+                    utterance.rate = 1;
+                } else if (currentLevel <= 20) {
+                    utterance.pitch = 1.2;
+                    utterance.rate = 1.1;
+                } else {
+                    utterance.pitch = 1.5;
+                    utterance.rate = 1.3;
+                }
+
+                utterance.onend = () => {
+                    loadingSpinner.style.display = 'none';
+                    resolve();
+                };
+                utterance.onerror = (event) => {
+                    console.error('SpeechSynthesisUtterance.onerror', event);
+                    loadingSpinner.style.display = 'none';
+                    showMessage("Speech synthesis failed. Your browser might not support it or there's an issue with the voice service.");
+                    resolve();
+                };
+
+                loadingSpinner.style.display = 'block';
+                synth.speak(utterance);
+            });
+        }
+
+        // Function to start the timer
+        function startTimer() {
+            const timeLimit = currentLevel <= 10 ? 60 : Math.max(15, 60 - (currentLevel - 10) * 5);
+            timeLeft = timeLimit;
+            timerDisplay.textContent = timeLeft;
+            progressBar.style.width = '100%';
+
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                progressBar.style.width = `${(timeLeft / timeLimit) * 100}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showMessage("Time's up! You ran out of time.");
+                    endGame(false);
+                }
+            }, 1000);
+        }
+
+        // Function to display a new question
+        async function displayQuestion() {
+            if (!gameActive) return;
+
+            clearInterval(timer);
+            selectedChoice = null;
+            submitBtn.disabled = true;
+            choiceButtons.forEach(btn => {
+                btn.classList.remove('correct', 'incorrect', 'selected');
+                btn.disabled = false;
+            });
+
+            const question = getQuestion();
+            if (!question) return;
+
+            levelDisplay.textContent = currentLevel;
+
+            listenBtn.disabled = true;
+            await speakWord(vocabulary[currentWordIndex]);
+            listenBtn.disabled = false;
+
+            question.choices.forEach((choice, index) => {
+                choiceButtons[index].textContent = choice;
+                choiceButtons[index].dataset.word = question.word;
+                choiceButtons[index].dataset.choice = choice;
+            });
+
+            startTimer();
+        }
+
+        // Function to handle choice selection
+        function handleChoiceClick(event) {
+            choiceButtons.forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            selectedChoice = event.target.dataset.choice;
+            submitBtn.disabled = false;
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            clearInterval(timer);
+            submitBtn.disabled = true;
+
+            const currentWord = vocabulary[currentWordIndex].word;
+            const isCorrect = selectedChoice === currentWord;
+
+            choiceButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('selected');
+                if (btn.dataset.choice === currentWord) {
+                    btn.classList.add('correct');
+                } else if (btn.dataset.choice === selectedChoice && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            if (isCorrect) {
+                score++;
+                wordsKnown.push(currentWord);
+                showMessage("Correct! Well done!");
+            } else {
+                wordsUnknown.push(currentWord);
+                showMessage(`Incorrect. The correct word was "${currentWord}".`);
+            }
+
+            wordsPlayed.push(vocabulary[currentWordIndex]);
+
+            setTimeout(() => {
+                if (wordsPlayed.length === vocabulary.length) {
+                    endGame(true);
+                } else {
+                    currentLevel++;
+                    displayQuestion();
+                }
+            }, 1500);
+        }
+
+        // Function to save game results to localStorage
+        function saveGameResults() {
+            const userId = localStorage.getItem('userId');
+            const results = {
+                timestamp: new Date().toISOString(),
+                levelReached: currentLevel,
+                totalWords: vocabulary.length,
+                wordsKnownCount: wordsKnown.length,
+                wordsUnknownCount: wordsUnknown.length,
+                wordsKnown: wordsKnown,
+                wordsUnknown: wordsUnknown
+            };
+
+            try {
+                const existingResults = JSON.parse(localStorage.getItem('vocabulary_game_results') || '[]');
+                existingResults.push(results);
+                localStorage.setItem('vocabulary_game_results', JSON.stringify(existingResults));
+                console.log("Game results saved to localStorage.");
+            } catch (error) {
+                console.error("Error saving game results to localStorage:", error);
+                showMessage("Failed to save game results locally.");
+            }
+        }
+
+        // Function to end the game
+        function endGame(won) {
+            gameActive = false;
+            clearInterval(timer);
+            gameScreen.classList.remove('active');
+            resultScreen.classList.add('active');
+
+            totalWordsDisplay.textContent = vocabulary.length;
+            wordsKnownDisplay.textContent = wordsKnown.length;
+
+            if (won) {
+                resultMessage.textContent = "Congratulations! You know every word!";
+            } else {
+                resultMessage.textContent = "Game Over!";
+            }
+
+            const knownPercentage = (wordsKnown.length / vocabulary.length) * 100;
+            const unknownPercentage = ((vocabulary.length - wordsKnown.length) / vocabulary.length) * 100;
+
+            chartKnownBar.style.width = `${knownPercentage}%`;
+            chartUnknownBar.style.width = `${unknownPercentage}%`;
+            chartKnownPercentage.textContent = `${knownPercentage.toFixed(1)}%`;
+            chartUnknownPercentage.textContent = `${unknownPercentage.toFixed(1)}%`;
+
+            saveGameResults();
+        }
+
+        // Function to reset game state and start over
+        function resetGame() {
+            currentLevel = 1;
+            score = 0;
+            wordsPlayed = [];
+            wordsKnown = [];
+            wordsUnknown = [];
+            selectedChoice = null;
+            gameActive = true;
+            shuffleArray(vocabulary);
+            displayQuestion();
+        }
+
+        // Event Listeners
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active');
+            gameScreen.classList.add('active');
+            resetGame();
+        });
+
+        listenBtn.addEventListener('click', async () => {
+            const currentWordData = vocabulary[currentWordIndex];
+            listenBtn.disabled = true;
+            await speakWord(currentWordData);
+            listenBtn.disabled = false;
+        });
+
+        choiceButtons.forEach(button => {
+            button.addEventListener('click', handleChoiceClick);
+        });
+
+        submitBtn.addEventListener('click', checkAnswer);
+
+        playAgainBtn.addEventListener('click', () => {
+            resultScreen.classList.remove('active');
+            startScreen.classList.add('active');
+        });
+    </script>
+</body>
+</html>
